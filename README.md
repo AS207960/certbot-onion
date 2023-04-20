@@ -1,8 +1,8 @@
-# certbot-dns-ispconfig
+# certbot-onion
 
 `onion-csr-01` Authenticator plugin for Certbot
 
-This process allows certbot to request certificates for `.onion` domains using the `onion-csr-01` challenge type,
+This plugin allows certbot to request certificates for `.onion` domains using the `onion-csr-01` challenge type,
 signing the request with the key of the hidden service.
 
 ## Installation
