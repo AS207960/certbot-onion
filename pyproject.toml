@@ -1,0 +1,31 @@
+[project]
+name = "certbot-onion"
+version = "0.1.0"
+description = "Certbot authenticator plugin for the onion-csr-01 challenge"
+authors = [
+    {name = "Q Misell", email = "q@as207960.net"}
+]
+license = {text = "MIT"}
+dependencies = [
+    "certbot"
+]
+readme = "README.md"
+
+[project.urls]
+"Homepage" = "https://acmeforonions.org"
+"Bug Tracker" = "https://github.com/AS207960/certbot-onion"
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel", "setuptools-rust"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["certbot_onion*"]
+
+[tool.setuptools]
+zip-safe = false
+package-dir = {"" = "src"}
+
+[project.entry-points."certbot.plugins"]
+onion-csr = "certbot_onion:Authenticator"

@@ -1,0 +1,20 @@
+[package]
+name = "certbot-onion"
+version = "0.1.0"
+authors = ["Q Misell <q@as207960.net>"]
+edition = "2021"
+
+[dependencies]
+pyo3 = { version = "0.18", features = ["extension-module"] }
+ed25519-dalek = "1"
+hex=  "0.4"
+openssl = "0.10"
+openssl-sys = "0.9"
+rand = "0.8"
+libc = "0.2"
+foreign-types-shared = "0.1"
+asn1 = "0.14"
+
+[lib]
+name = "certbot_onion_rust"
+crate-type = ["cdylib"]
