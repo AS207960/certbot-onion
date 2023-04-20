@@ -1,0 +1,9 @@
+include LICENSE.md
+include README.md
+
+include pyproject.toml
+recursive-include rust Cargo.toml Cargo.lock *.rs
+exclude src/rust/target
+recursive-exclude src/rust/target *
+
+recursive-exclude .github *

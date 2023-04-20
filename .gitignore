@@ -2,3 +2,6 @@
 /src/certbot_onion.egg-info
 /src/certbot_onion/_rust.abi3.so
 /.idea
+*.pyc
+__pycache__
+/dist/
