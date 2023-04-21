@@ -29,3 +29,6 @@ package-dir = {"" = "src"}
 
 [project.entry-points."certbot.plugins"]
 onion-csr = "certbot_onion:Authenticator"
+
+[tool.cibuildwheel]
+before-all = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"

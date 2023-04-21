@@ -67,10 +67,6 @@ fn make_csr(priv_key: &[u8], ca_nonce: &[u8]) -> PyResult<Vec<u8>> {
     Ok(req)
 }
 
-fn encode_asn1_bit_string(data: &[u8]) -> Vec<u8> {
-    asn1::write_single(&asn1::BitString::new(data, 0)).unwrap()
-}
-
 extern "C" {
     fn i2d_re_X509_REQ_tbs(req: *const openssl_sys::X509_REQ, buf: *mut *mut u8) -> libc::c_int;
     fn X509_REQ_add1_attr_by_txt(
