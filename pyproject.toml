@@ -16,7 +16,7 @@ readme = "README.md"
 "Bug Tracker" = "https://github.com/AS207960/certbot-onion"
 
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel", "setuptools-rust"]
+requires = ["setuptools", "wheel", "setuptools-rust"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
