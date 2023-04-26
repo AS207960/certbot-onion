@@ -24,11 +24,12 @@ The important arguments here are:
 
 ## ⚠️ WARNING ⚠️
 
-This plugin is currently non-functional, it will not work until [this PR](https://github.com/certbot/certbot/pull/9680)
-is merged into certbot.
+This plugin is currently non-functional, it will not work until Certbot version 
+2.6.0 is released.
 
-In the meantime you update certbot to a fork that will work with the following command:
+In the meantime you update Certbot to the commit incorporating the changes required for this plugin to work:
 
 ```shell 
-pip install git+https://github.com/AS207960/certbot.git@unknown-challenges
+pip install git+https://github.com/certbot/certbot.git@8a0b0f6#subdirectory=certbot \
+  git+https://github.com/certbot/certbot.git@8a0b0f6#subdirectory=acme
 ```

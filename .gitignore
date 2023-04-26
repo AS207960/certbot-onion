@@ -1,4 +1,5 @@
 /rust/target
+/rust/Cargo.lock
 /src/certbot_onion.egg-info
 /src/certbot_onion/_rust.abi3.so
 /.idea
@@ -6,3 +7,4 @@
 __pycache__
 /dist/
 /wheelhouse/
+/build
