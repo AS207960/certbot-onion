@@ -21,15 +21,3 @@ The important arguments here are:
 
 * `--authenticator onion-csr` - Tells certbot to use this plugin for domain authentication
 * `--onion-csr-hs-dir /var/lib/tor/example_hs/` - Provides the path to the hidden service directory, this can be specified multiple times for multiple domains.
-
-## ⚠️ WARNING ⚠️
-
-This plugin is currently non-functional, it will not work until Certbot version 
-2.6.0 is released.
-
-In the meantime you update Certbot to the commit incorporating the changes required for this plugin to work:
-
-```shell 
-pip install git+https://github.com/certbot/certbot.git@8a0b0f6#subdirectory=certbot \
-  git+https://github.com/certbot/certbot.git@8a0b0f6#subdirectory=acme
-```
