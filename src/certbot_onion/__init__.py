@@ -1,7 +1,6 @@
 import typing
 import josepy
 import functools
-import base64
 import acme.challenges
 import certbot.errors
 import certbot.interfaces
@@ -89,11 +88,16 @@ class Authenticator(certbot.plugins.common.Plugin, certbot.interfaces.Authentica
         else:
             return []
 
+    @staticmethod
+    def __match_hs(hs_domain: str, chall_domain: str) -> bool:
+        match_domain = ".".join(chall_domain.rsplit(".", 2)[-2:])
+        return hs_domain == match_domain
+
     def perform(self, achalls: typing.List[certbot.achallenges.AnnotatedChallenge]) -> \
             typing.List[OnionCSR01Response]:
         out = []
         for achall in achalls:
-            hs = next(filter(lambda x: x.domain == achall.domain, self.hs), None)
+            hs = next(filter(lambda x: self.__match_hs(x.domain, achall.domain), self.hs), None)
             if not hs:
                 raise certbot.errors.PluginError(f"Unable to find hidden service key for domain {achall.domain}")
 
