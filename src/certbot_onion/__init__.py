@@ -48,10 +48,12 @@ class Authenticator(certbot.plugins.common.Plugin, certbot.interfaces.Authentica
 
     @classmethod
     def add_parser_arguments(cls, add: typing.Callable[..., None]) -> None:
-        add("hs-dir", help="Path to a Tor hidden service directory", nargs="+", required=True)
+        add("hs-dir", help="Path to a Tor hidden service directory", nargs="+", required=False)
 
     def prepare(self) -> None:
-        for hs_dir in self.conf("hs-dir"):
+        hs_dirs = self.conf("hs-dir")
+        hs_dirs = hs_dirs if hs_dirs is not None else []
+        for hs_dir in hs_dirs:
             if not os.path.isdir(hs_dir):
                 raise certbot.errors.PluginError(f"Hidden service directory path {hs_dir} is not a directory")
 
