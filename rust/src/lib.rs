@@ -13,9 +13,9 @@ fn _rust(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 fn make_csr(priv_key: &[u8], ca_nonce: &[u8]) -> PyResult<Vec<u8>> {
     let mut rng = rand::thread_rng();
 
-    let sk = ed25519_dalek::ExpandedSecretKey::from_bytes(priv_key)
+    let sk = ed25519_dalek::hazmat::ExpandedSecretKey::from_slice(priv_key)
         .map_err(|e| PyErr::new::<pyo3::exceptions::PyValueError, _>(e.to_string()))?;
-    let pk = ed25519_dalek::PublicKey::from(&sk);
+    let pk = ed25519_dalek::VerifyingKey::from(&sk);
     let openssl_pk = openssl::pkey::PKey::public_key_from_raw_bytes(
         pk.as_bytes(), openssl::pkey::Id::ED25519
     ).unwrap();
@@ -49,7 +49,7 @@ fn make_csr(priv_key: &[u8], ca_nonce: &[u8]) -> PyResult<Vec<u8>> {
         buf
     };
 
-    let signature = sk.sign(&tbs_req, &pk).to_bytes();
+    let signature = ed25519_dalek::hazmat::raw_sign::<sha2::Sha512>(&sk, &tbs_req, &pk).to_bytes();
 
     let tbs_req: asn1::Sequence = asn1::parse_single(&tbs_req).unwrap();
 

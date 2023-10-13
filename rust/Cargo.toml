@@ -5,15 +5,16 @@ authors = ["Q Misell <q@as207960.net>"]
 edition = "2021"
 
 [dependencies]
-pyo3 = { version = "0.18", features = ["extension-module"] }
-ed25519-dalek = "1"
+pyo3 = { version = "0.20", features = ["extension-module"] }
+ed25519-dalek = { version = "2", features = ["hazmat"] }
 hex =  "0.4"
 openssl = { version = ">=0.10.25", features = ["vendored", "v111"] }
 openssl-sys = "0.9"
 rand = "0.8"
 libc = "0.2"
 foreign-types-shared = "0.1"
-asn1 = "0.14"
+asn1 = "0.15"
+sha2 = "0.10.8"
 
 [lib]
 name = "certbot_onion_rust"
