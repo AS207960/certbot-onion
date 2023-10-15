@@ -17,14 +17,20 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Perl IPC
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get install libipc-run-perl
-
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel
 
       - name: Build wheels
+        if: matrix.os == 'ubuntu-latest'
+        run: python -m cibuildwheel --output-dir wheelhouse
+        env:
+          CIBW_BEFORE_ALL: "apt-get install libipc-run-perl"
+          CIBW_BUILD_FRONTEND: "build"
+          CIBW_ENVIRONMENT: "PATH=\"$PATH:$HOME/.cargo/bin\""
+          CIBW_SKIP: "*_i686 cp36-*"
+
+      - name: Build wheels
+        if: matrix.os != 'ubuntu-latest'
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BUILD_FRONTEND: "build"
