@@ -6,7 +6,7 @@ edition = "2021"
 
 [dependencies]
 pyo3 = { version = "0.20", features = ["extension-module"] }
-ed25519-dalek = { version = "2", features = ["hazmat"] }
+ed25519-dalek = { version = "2", features = ["hazmat", "zeroize"] }
 hex =  "0.4"
 openssl = { version = ">=0.10.25", features = ["vendored", "v111"] }
 openssl-sys = "0.9"

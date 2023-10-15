@@ -4,67 +4,88 @@ use foreign_types_shared::ForeignType;
 
 #[pymodule]
 fn _rust(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(make_csr, m)?)?;
+    m.add_class::<PrivateKey>()?;
 
     Ok(())
 }
 
-#[pyfunction]
-fn make_csr(priv_key: &[u8], ca_nonce: &[u8]) -> PyResult<Vec<u8>> {
-    let mut rng = rand::thread_rng();
+#[pyclass(frozen)]
+struct PrivateKey {
+    sk: ed25519_dalek::hazmat::ExpandedSecretKey,
+    pk: ed25519_dalek::VerifyingKey,
+}
 
-    let sk = ed25519_dalek::hazmat::ExpandedSecretKey::from_slice(priv_key)
-        .map_err(|e| PyErr::new::<pyo3::exceptions::PyValueError, _>(e.to_string()))?;
-    let pk = ed25519_dalek::VerifyingKey::from(&sk);
-    let openssl_pk = openssl::pkey::PKey::public_key_from_raw_bytes(
-        pk.as_bytes(), openssl::pkey::Id::ED25519
-    ).unwrap();
+#[pymethods]
+impl PrivateKey {
+    #[new]
+    fn new(priv_key: &[u8]) -> PyResult<Self> {
+        let sk = ed25519_dalek::hazmat::ExpandedSecretKey::from_slice(priv_key)
+            .map_err(|e| PyErr::new::<pyo3::exceptions::PyValueError, _>(e.to_string()))?;
+        let pk = ed25519_dalek::VerifyingKey::from(&sk);
 
-    let mut builder = openssl::x509::X509ReqBuilder::new().unwrap();
-    builder.set_version(0).unwrap();
-    builder.set_pubkey(&openssl_pk).unwrap();
-
-    let mut applicant_nonce = [0u8; 10];
-    rng.fill(&mut applicant_nonce);
-
-    let req = builder.build();
-
-    unsafe {
-        cvt(X509_REQ_add1_attr_by_txt(
-            req.as_ptr(), b"2.23.140.41\0" as *const u8,
-            openssl_sys::V_ASN1_OCTET_STRING,
-            ca_nonce.as_ptr(), ca_nonce.len() as i32
-        )).unwrap();
-        cvt(X509_REQ_add1_attr_by_txt(
-            req.as_ptr(), b"2.23.140.42\0" as *const u8,
-            openssl_sys::V_ASN1_OCTET_STRING,
-            applicant_nonce.as_ptr(), applicant_nonce.len() as i32
-        )).unwrap();
+        Ok(Self {
+            sk,
+            pk,
+        })
     }
 
-    let tbs_req = unsafe {
-        let len = cvt(i2d_re_X509_REQ_tbs(req.as_ptr(), std::ptr::null_mut())).unwrap();
-        let mut buf = vec![0u8; len as usize];
-        cvt(i2d_re_X509_REQ_tbs(req.as_ptr(), &mut buf.as_mut_ptr())).unwrap();
-        buf
-    };
+    fn sign(&self, msg: &[u8]) -> PyResult<std::borrow::Cow<[u8]>> {
+        let signature = ed25519_dalek::hazmat::raw_sign::<sha2::Sha512>(&self.sk, msg, &self.pk).to_bytes();
+        Ok(std::borrow::Cow::Owned(signature.to_vec()))
+    }
 
-    let signature = ed25519_dalek::hazmat::raw_sign::<sha2::Sha512>(&sk, &tbs_req, &pk).to_bytes();
+    fn make_csr(&self, ca_nonce: &[u8]) -> PyResult<std::borrow::Cow<[u8]>> {
+        let mut rng = rand::thread_rng();
+        let mut applicant_nonce = [0u8; 10];
+        rng.fill(&mut applicant_nonce);
+        drop(rng);
 
-    let tbs_req: asn1::Sequence = asn1::parse_single(&tbs_req).unwrap();
+        let openssl_pk = openssl::pkey::PKey::public_key_from_raw_bytes(
+            self.pk.as_bytes(), openssl::pkey::Id::ED25519
+        ).unwrap();
 
-    let req = asn1::write(|w| {
-        w.write_element(&asn1::SequenceWriter::new(&|w| {
-            w.write_element(&tbs_req)?;
+        let mut builder = openssl::x509::X509ReqBuilder::new().unwrap();
+        builder.set_version(0).unwrap();
+        builder.set_pubkey(&openssl_pk).unwrap();
+        let req = builder.build();
+
+        unsafe {
+            cvt(X509_REQ_add1_attr_by_txt(
+                req.as_ptr(), b"2.23.140.41\0" as *const u8,
+                openssl_sys::V_ASN1_OCTET_STRING,
+                ca_nonce.as_ptr(), ca_nonce.len() as i32
+            )).unwrap();
+            cvt(X509_REQ_add1_attr_by_txt(
+                req.as_ptr(), b"2.23.140.42\0" as *const u8,
+                openssl_sys::V_ASN1_OCTET_STRING,
+                applicant_nonce.as_ptr(), applicant_nonce.len() as i32
+            )).unwrap();
+        }
+
+        let tbs_req = unsafe {
+            let len = cvt(i2d_re_X509_REQ_tbs(req.as_ptr(), std::ptr::null_mut())).unwrap();
+            let mut buf = vec![0u8; len as usize];
+            cvt(i2d_re_X509_REQ_tbs(req.as_ptr(), &mut buf.as_mut_ptr())).unwrap();
+            buf
+        };
+
+        let signature = ed25519_dalek::hazmat::raw_sign::<sha2::Sha512>(&self.sk, &tbs_req, &self.pk).to_bytes();
+
+        let tbs_req: asn1::Sequence = asn1::parse_single(&tbs_req).unwrap();
+        let req = asn1::write(|w| {
             w.write_element(&asn1::SequenceWriter::new(&|w| {
-                w.write_element(&asn1::ObjectIdentifier::from_string("1.3.101.112").unwrap())
-            }))?;
-            w.write_element(&asn1::BitString::new(&signature, 0))?;
-            Ok(())
-        }))
-    }).unwrap();
+                w.write_element(&tbs_req)?;
+                w.write_element(&asn1::SequenceWriter::new(&|w| {
+                    w.write_element(&asn1::ObjectIdentifier::from_string("1.3.101.112").unwrap())
+                }))?;
+                w.write_element(&asn1::BitString::new(&signature, 0))?;
+                Ok(())
+            }))
+        }).unwrap();
 
-    Ok(req)
+
+        Ok(std::borrow::Cow::Owned(req))
+    }
 }
 
 extern "C" {
