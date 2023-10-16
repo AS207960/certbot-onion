@@ -1,6 +1,6 @@
 [project]
 name = "certbot-onion"
-version = "0.2.0"
+version = "0.2.1"
 description = "Certbot authenticator plugin for the onion-csr-01 challenge"
 authors = [
     {name = "Q Misell", email = "q@as207960.net"}

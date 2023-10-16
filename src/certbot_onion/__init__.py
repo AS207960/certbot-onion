@@ -113,7 +113,7 @@ class Authenticator(certbot.plugins.common.Plugin, certbot.interfaces.Authentica
             caa = hs.caa if hs.caa else []
             caa = "\n".join(caa)
 
-            tbs = f"onion-csr|{expiry}|{caa}".encode("utf-8")
+            tbs = f"onion-caa|{expiry}|{caa}".encode("utf-8")
             signature = hs.private_key.sign(tbs)
 
             out[hs.domain] = OnionCAA(
@@ -215,7 +215,7 @@ class Authenticator(certbot.plugins.common.Plugin, certbot.interfaces.Authentica
             if not hs:
                 raise certbot.errors.PluginError(f"Unable to find hidden service key for domain {achall.domain}")
 
-            csr = certbot_onion._rust.make_csr(hs.private_key, achall.nonce)
+            csr = hs.private_key.make_csr(achall.nonce)
             out.append(OnionCSR01Response(csr=csr))
 
         return out
