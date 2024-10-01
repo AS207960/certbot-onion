@@ -122,6 +122,14 @@ impl ArtiOnionService {
     }
 }
 
+impl Drop for ArtiOnionService {
+    fn drop(&mut self) {
+        self.client.execute(&ArtiRequest::new(self.client.session().unwrap(), "rpc:release", ArtiReleaseRequest {
+            obj: &self.object_id
+        }).encode()).unwrap().unwrap();
+    }
+}
+
 #[derive(serde::Serialize, Debug)]
 struct ArtiRequest<'a, T> {
     obj: &'a arti_rpc_client_core::ObjectId,
@@ -195,4 +203,9 @@ struct ArtiOnionServiceNameRequest {}
 #[derive(serde::Deserialize, Debug)]
 struct ArtiOnionServiceNameResponse {
     name: String
+}
+
+#[derive(serde::Serialize, Debug)]
+struct ArtiReleaseRequest<'a> {
+    obj: &'a arti_rpc_client_core::ObjectId
 }

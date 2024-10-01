@@ -45,3 +45,6 @@ class ArtiAuthenticator:
             expiry=caa.expiry,
             signature=caa.signature,
         )
+
+    def cleanup(self):
+        self.onion_services.clear()

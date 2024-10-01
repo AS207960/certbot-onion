@@ -84,4 +84,4 @@ class Authenticator(certbot.plugins.common.Plugin, certbot.interfaces.Authentica
         return out
 
     def cleanup(self, achalls: typing.List[certbot.achallenges.AnnotatedChallenge]) -> None:
-        pass
+        self.backend.cleanup()

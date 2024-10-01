@@ -130,3 +130,6 @@ class CTorAuthenticator:
 
         csr = hs.private_key.make_csr(challenge.nonce)
         return util.OnionCSR01Response(csr=csr)
+
+    def cleanup(self):
+        self.hs = []
