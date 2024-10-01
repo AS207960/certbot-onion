@@ -15,6 +15,11 @@ libc = "0.2"
 foreign-types-shared = "0.1"
 asn1 = "0.15"
 sha2 = "0.10.8"
+arti-rpc-client-core = "0.22.0"
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = "1.0.128"
+derive_more = "0.99.18"
+base64ct = { version = "1.6.0", features = ["alloc"] }
 
 [lib]
 name = "certbot_onion_rust"
