@@ -63,7 +63,7 @@ impl ArtiClient {
     }
 
     fn get_onion_service(&self, domain: &str) -> PyResult<ArtiOnionService> {
-        let resp = self.client.execute(&ArtiRequest::new(self.client.session().unwrap(), "arti:get_onion_service", ArtiOnionServiceRequest {
+        let resp = self.client.execute(&ArtiRequest::new(self.client.session().unwrap(), "arti:x_acme_get_onion_service", ArtiOnionServiceRequest {
             domain
         }).encode())
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyConnectionError, _>(format!("protocol error: {}", e)))?
@@ -81,7 +81,7 @@ impl ArtiClient {
 #[pymethods]
 impl ArtiOnionService {
     fn onion_name(&self) -> PyResult<String> {
-        let resp = self.client.execute(&ArtiRequest::new(&self.object_id, "arti:onion_service_name", ArtiOnionServiceNameRequest {}).encode())
+        let resp = self.client.execute(&ArtiRequest::new(&self.object_id, "arti:x_acme_onion_service_name", ArtiOnionServiceNameRequest {}).encode())
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyConnectionError, _>(format!("protocol error: {}", e)))?
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("unable to get onion service name: {}", e)))?;
 
@@ -90,7 +90,7 @@ impl ArtiOnionService {
     }
 
     fn make_csr(&self, ca_nonce: &[u8]) -> PyResult<std::borrow::Cow<[u8]>> {
-        let resp = self.client.execute(&ArtiRequest::new(&self.object_id, "arti:onion_service_csr", ArtiCsrRequest {
+        let resp = self.client.execute(&ArtiRequest::new(&self.object_id, "arti:x_acme_onion_service_csr", ArtiCsrRequest {
             ca_nonce: base64ct::Base64::encode_string(ca_nonce)
         }).encode())
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyConnectionError, _>(format!("protocol error: {}", e)))?
@@ -104,7 +104,7 @@ impl ArtiOnionService {
     }
 
     fn sign_caa(&self, expiry: u32) -> PyResult<OnionCAA> {
-        let resp = self.client.execute(&ArtiRequest::new(&self.object_id, "arti:onion_service_caa", ArtiCaaRequest {
+        let resp = self.client.execute(&ArtiRequest::new(&self.object_id, "arti:x_acme_onion_service_caa", ArtiCaaRequest {
             expiry,
         }).encode())
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyConnectionError, _>(format!("protocol error: {}", e)))?
