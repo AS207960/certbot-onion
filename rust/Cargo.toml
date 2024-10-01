@@ -10,6 +10,7 @@ ed25519-dalek = { version = "2", features = ["hazmat", "zeroize"] }
 hex =  "0.4"
 openssl = { version = ">=0.10.25", features = ["vendored", "v111"] }
 openssl-sys = "0.9"
+openssl-src = "=300.3.1"
 rand = "0.8"
 libc = "0.2"
 foreign-types-shared = "0.1"
