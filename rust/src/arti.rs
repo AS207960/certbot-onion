@@ -69,11 +69,11 @@ impl ArtiClient {
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyConnectionError, _>(format!("protocol error: {}", e)))?
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("unable to find onion service: {}", e)))?;
 
-        let resp = ArtiResponse::<ArtiOnionServiceResponse>::parse(&resp)?;
+        let resp = ArtiResponse::<ObjectIdResponse>::parse(&resp)?;
 
         Ok(ArtiOnionService {
             client: self.client.clone(),
-            object_id: resp.result.service
+            object_id: resp.result.id
         })
     }
 }
@@ -81,16 +81,16 @@ impl ArtiClient {
 #[pymethods]
 impl ArtiOnionService {
     fn onion_name(&self) -> PyResult<String> {
-        let resp = self.client.execute(&ArtiRequest::new(&self.object_id, "arti:x_acme_onion_service_name", ArtiOnionServiceNameRequest {}).encode())
+        let resp = self.client.execute(&ArtiRequest::new(&self.object_id, "arti:x_acme_get_onion_service_name", ArtiOnionServiceNameRequest {}).encode())
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyConnectionError, _>(format!("protocol error: {}", e)))?
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("unable to get onion service name: {}", e)))?;
 
         let resp = ArtiResponse::<ArtiOnionServiceNameResponse>::parse(&resp)?;
-        Ok(resp.result.name)
+        Ok(resp.result.domain)
     }
 
     fn make_csr(&self, ca_nonce: &[u8]) -> PyResult<std::borrow::Cow<[u8]>> {
-        let resp = self.client.execute(&ArtiRequest::new(&self.object_id, "arti:x_acme_onion_service_csr", ArtiCsrRequest {
+        let resp = self.client.execute(&ArtiRequest::new(&self.object_id, "arti:x_acme_generate_onion_service_csr", ArtiCsrRequest {
             ca_nonce: base64ct::Base64::encode_string(ca_nonce)
         }).encode())
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyConnectionError, _>(format!("protocol error: {}", e)))?
@@ -104,7 +104,7 @@ impl ArtiOnionService {
     }
 
     fn sign_caa(&self, expiry: u32) -> PyResult<OnionCAA> {
-        let resp = self.client.execute(&ArtiRequest::new(&self.object_id, "arti:x_acme_onion_service_caa", ArtiCaaRequest {
+        let resp = self.client.execute(&ArtiRequest::new(&self.object_id, "arti:x_acme_get_onion_service_caa", ArtiCaaRequest {
             expiry,
         }).encode())
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyConnectionError, _>(format!("protocol error: {}", e)))?
@@ -119,14 +119,6 @@ impl ArtiOnionService {
             expiry: resp.result.expiry,
             signature: std::borrow::Cow::Owned(signature),
         })
-    }
-}
-
-impl Drop for ArtiOnionService {
-    fn drop(&mut self) {
-        self.client.execute(&ArtiRequest::new(self.client.session().unwrap(), "rpc:release", ArtiReleaseRequest {
-            obj: &self.object_id
-        }).encode()).unwrap().unwrap();
     }
 }
 
@@ -171,8 +163,8 @@ struct ArtiOnionServiceRequest<'a> {
 }
 
 #[derive(serde::Deserialize, Debug)]
-struct ArtiOnionServiceResponse {
-    service: arti_rpc_client_core::ObjectId,
+struct ObjectIdResponse {
+    id: arti_rpc_client_core::ObjectId,
 }
 
 #[derive(serde::Serialize, Debug)]
@@ -202,10 +194,5 @@ struct ArtiOnionServiceNameRequest {}
 
 #[derive(serde::Deserialize, Debug)]
 struct ArtiOnionServiceNameResponse {
-    name: String
-}
-
-#[derive(serde::Serialize, Debug)]
-struct ArtiReleaseRequest<'a> {
-    obj: &'a arti_rpc_client_core::ObjectId
+    domain: String
 }
