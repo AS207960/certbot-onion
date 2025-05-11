@@ -1,13 +1,13 @@
 [project]
 name = "certbot-onion"
-version = "0.3.3"
+version = "0.4.0"
 description = "Certbot authenticator plugin for the onion-csr-01 challenge"
 authors = [
     {name = "Q Misell", email = "q@as207960.net"}
 ]
 license = {text = "MIT"}
 dependencies = [
-    "certbot>=2.6.0"
+    "certbot>=4.0.0"
 ]
 readme = "README.md"
 
@@ -31,5 +31,4 @@ package-dir = {"" = "src"}
 onion-csr = "certbot_onion:Authenticator"
 
 [tool.cibuildwheel]
-before-all = """curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y;
-pip install cryptography"""
+before-all = """curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; pip install cryptography"""

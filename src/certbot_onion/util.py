@@ -2,6 +2,7 @@ import josepy
 import typing
 import functools
 import acme.challenges
+import cryptography.x509
 
 class OnionCAA(josepy.JSONObjectWithFields):
     caa: typing.Union[str, None] = josepy.field('caa')
@@ -9,7 +10,7 @@ class OnionCAA(josepy.JSONObjectWithFields):
     signature: bytes = josepy.field('signature', encoder=josepy.encode_b64jose, decoder=josepy.decode_b64jose)
 
 class CertificateRequest(josepy.JSONObjectWithFields):
-    csr: josepy.ComparableX509 = josepy.field('csr', decoder=josepy.decode_csr, encoder=josepy.encode_csr)
+    csr: cryptography.x509.CertificateSigningRequest = josepy.field('csr', decoder=josepy.decode_csr, encoder=josepy.encode_csr)
     onion_caa: typing.Dict[str, OnionCAA] = josepy.field('onionCAA', omitempty=True)
 
 

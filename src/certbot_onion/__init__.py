@@ -3,7 +3,7 @@ import josepy
 import acme.challenges
 import acme.messages
 import acme.client
-import OpenSSL.crypto
+import cryptography.x509
 import certbot.interfaces
 import certbot.plugins.common
 import certbot.achallenges
@@ -41,13 +41,8 @@ class Authenticator(certbot.plugins.common.Plugin, certbot.interfaces.Authentica
                 if domain not in onion_caa:
                     onion_caa[domain] = caa
 
-        csr = OpenSSL.crypto.load_certificate_request(
-            OpenSSL.crypto.FILETYPE_PEM, order.csr_pem
-        )
-        wrapped_csr = util.CertificateRequest(
-            csr=josepy.ComparableX509(csr),
-            onion_caa=onion_caa
-        )
+        csr = cryptography.x509.load_pem_x509_csr(order.csr_pem)
+        wrapped_csr = util.CertificateRequest(csr=csr, onion_caa=onion_caa)
         res = acme_client._post(order.body.finalize, wrapped_csr)
         order = order.update(body=acme.messages.Order.from_json(res.json()))
         return order
