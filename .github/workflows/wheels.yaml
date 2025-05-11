@@ -42,7 +42,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-${{ matrix.target }}
           path: dist
 
   build_sdist:
@@ -56,7 +56,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-sdist
           path: dist/*.tar.gz
 
   upload_pypi:
@@ -67,7 +67,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: wheels
+          name: wheels-*
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@v1.5.0
