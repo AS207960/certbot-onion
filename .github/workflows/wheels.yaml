@@ -67,7 +67,17 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: wheels-*
+          name: wheels-sdist
+          path: dist
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels-x86
+          path: dist
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels-x86_64
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@v1.5.0
